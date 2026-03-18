@@ -1,0 +1,53 @@
+services:
+  app:
+    container_name: fantasy_app
+    build:
+        context: ./
+        dockerfile: app.dockerfile
+    working_dir: /var/www
+    volumes:
+        - ./:/var/www
+    depends_on:
+        - "db"
+    networks:
+        - db
+  web:
+    container_name: fantasy_web
+    build:
+        context: .
+        dockerfile: web.dockerfile
+    working_dir: /var/www
+    volumes:
+        - ./:/var/www
+    depends_on:
+        - "app"
+    ports:
+        - 80:80
+    networks:
+        - db
+  db:
+    container_name: fantasy_db
+    image: postgres
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      PGDATA: /data/postgres
+      POSTGRES_DB: ${DB_DATABASE}
+    volumes:
+      - db:/data/postgres
+    ports:
+      - "${DB_PORT}:5432"
+    networks:
+      - db
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d postgres" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+networks:
+  db:
+    driver: bridge
+
+volumes:
+  db:
