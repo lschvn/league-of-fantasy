@@ -2,42 +2,93 @@
 
 ## Introduction
 
-This document describes the functional requirements of the **Fantasy Esport League** application.
-The system allows users to create or join fantasy leagues based on real esports competitions and manage their own fantasy teams.
+This document defines the functional scope of the **Fantasy Esport League** application.
+The product allows users to create and join fantasy leagues built on top of a real-world
+esport competition, draft professional players through auctions, submit weekly lineups,
+and compete through automatically calculated fantasy scores.
 
-Users can participate in leagues, build a roster of professional players through an auction system, manage their lineup, and compete against other participants based on the real-world performances of esports players.
+The documentation uses one stable distinction:
 
-The platform supports both **public leagues**, accessible to all users, and **private leagues**, accessible only through invitation. The system automatically calculates fantasy scores based on statistics collected from real matches.
-
-The goal of the application is to provide an interactive and competitive environment where users can follow esports competitions while engaging in strategic team management.
+- `Competition`: the real esport competition that provides teams, players, weeks, matches, and statistics.
+- `Fantasy League`: the user-created fantasy contest linked to one competition.
+- `Membership`: a user's participation in a fantasy league.
+- `Fantasy Team`: the roster owned by one membership.
+- `Lineup`: the subset of rostered players submitted for one week.
 
 ## Actors
 
-### User
+### Visitor
 
-A registered user of the platform. The user can create or join leagues, manage a fantasy team, participate in player auctions, set lineups, and view rankings and statistics.
+An unauthenticated person who can create an account and access the log-in screen.
+
+### Registered User
+
+An authenticated user who can create or join fantasy leagues, manage a fantasy team,
+bid in auctions, submit lineups, and consult standings and statistics.
+
+### League Owner
+
+A registered user with owner rights in a fantasy league. The owner creates the league,
+configures access, and manages invitations for private leagues.
 
 ### System
 
-The automated backend responsible for managing game logic and enforcing rules. The system handles tasks such as generating invitations, locking lineups after deadlines, updating fantasy scores based on real match statistics, and controlling access rights.
+The automated backend responsible for enforcing deadlines, validating access rules,
+locking lineups, processing auction outcomes, importing match statistics, and
+calculating fantasy scores and rankings.
+
+## Scope Assumptions
+
+- One fantasy league is linked to exactly one competition.
+- A user can have at most one active membership in a given fantasy league.
+- Each membership owns exactly one fantasy team.
+- Private leagues are accessed through invitations.
+- Lineups are submitted per week and locked at a deadline.
+- Leaderboards are based on persisted fantasy score snapshots.
 
 ## Features
 
-| ID  | Feature                     | Description                                                           | Main Actor    |
-| --- | --------------------------- | --------------------------------------------------------------------- | ------------- |
-| F01 | Register                    | Allow a user to create an account                                     | User          |
-| F02 | Log in                      | Allow an authenticated user to access the system                      | User          |
-| F03 | Create public game          | Create a game that is publicly visible and accessible                 | User          |
-| F04 | Join public game            | Allow a user to join an existing public game                          | User          |
-| F05 | Create private game         | Create a game accessible only through invitation                      | User          |
-| F06 | Generate private invitation | Generate an access code or link for a private game                    | System / User |
-| F07 | Join private game           | Allow a user to join a private game via invitation                    | User          |
-| F08 | Create fantasy team         | Create the fantasy team associated with the user within a game        | User / System |
-| F09 | Participate in auctions     | Allow a user to bid on players                                        | User          |
-| F10 | Manage roster               | Add, remove, and organize players within the fantasy team             | User          |
-| F11 | Set lineup                  | Select the active players for a given period                          | User          |
-| F12 | Lock lineup                 | Prevent lineup modifications after a defined deadline                 | System        |
-| F13 | View leaderboard            | Display the ranking of the game                                       | User          |
-| F14 | View statistics             | Display real and fantasy performance statistics of players            | User          |
-| F15 | Update scores               | Automatically calculate fantasy scores based on real match statistics | System        |
-| F16 | Manage access rights        | Control permissions depending on the game type                        | System        |
+| ID  | Feature                          | Description                                                                      | Main Actor      |
+| --- | -------------------------------- | -------------------------------------------------------------------------------- | --------------- |
+| F01 | Register                         | Allow a visitor to create an account                                             | Visitor         |
+| F02 | Log in                           | Allow a registered user to authenticate and open a session                       | Registered User |
+| F03 | Create public fantasy league     | Create a fantasy league visible in the public catalog                            | Registered User |
+| F04 | Join public fantasy league       | Join a public fantasy league before the join deadline                            | Registered User |
+| F05 | Create private fantasy league    | Create a fantasy league accessible only through invitation                       | League Owner    |
+| F06 | Manage private invitations       | Generate, revoke, and validate invitation codes or links                         | League Owner    |
+| F07 | Join private fantasy league      | Join a private fantasy league with a valid invitation                            | Registered User |
+| F08 | Participate in auctions          | Bid on professional players during an open auction phase                         | Registered User |
+| F09 | Manage roster                    | Consult and maintain the fantasy team roster acquired through auctions           | Registered User |
+| F10 | Submit lineup                    | Select the active roster for one week before the lock deadline                   | Registered User |
+| F11 | Lock lineup                      | Prevent lineup changes after the weekly deadline                                 | System          |
+| F12 | Calculate fantasy scores         | Compute fantasy points from real match statistics                                | System          |
+| F13 | View leaderboard                 | Display the ranking of fantasy teams in a league                                 | Registered User |
+| F14 | View statistics                  | Display real statistics and fantasy scoring details for players and teams        | Registered User |
+| F15 | Manage membership and access     | Control visibility, invitations, owner rights, and join permissions              | System / Owner  |
+| F16 | Enforce league rules and timing  | Apply participation limits, budget rules, deadlines, and scoring rule versions   | System          |
+
+## Business Rules
+
+- `BR01` A fantasy league must have exactly one owner.
+- `BR02` A user can join a fantasy league only once.
+- `BR03` A private fantasy league must not appear in the public catalog.
+- `BR04` Invitation codes must be unique within the application.
+- `BR05` An invitation can be expired, revoked, or exhausted after a maximum number of uses.
+- `BR06` A fantasy team must belong to exactly one membership.
+- `BR07` A player cannot be rostered by more than one fantasy team in the same fantasy league at the same time.
+- `BR08` Bids must respect the remaining budget of the fantasy team.
+- `BR09` A lineup must contain only players currently rostered by the submitting fantasy team.
+- `BR10` A fantasy team can submit at most one lineup per week.
+- `BR11` A locked lineup becomes read-only.
+- `BR12` Weekly standings must be calculated from persisted weekly fantasy team scores.
+- `BR13` Score calculation must use the scoring rule version configured on the fantasy league.
+
+## Traceability Summary
+
+| Area                     | Main Features         | Main Domain Objects                                  |
+| ------------------------ | --------------------- | ---------------------------------------------------- |
+| Authentication           | F01, F02              | User                                                 |
+| League creation/joining  | F03, F04, F05, F06, F07, F15 | FantasyLeague, Membership, Invitation         |
+| Roster acquisition       | F08, F09, F16         | Auction, Bid, FantasyTeam, RosterSlot                |
+| Weekly gameplay          | F10, F11, F12, F16    | Week, Lineup, LineupSlot, PlayerStat, FantasyTeamScore |
+| Read models              | F13, F14              | FantasyTeamScore, PlayerStat, Competition, FantasyTeam |

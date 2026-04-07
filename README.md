@@ -1,15 +1,31 @@
-# League of Fantasy
+# Fantasy Esport League
 
-## Developement
+This repository currently contains the Laravel application scaffold and the project
+design documentation for the planned fantasy esport product.
 
-The dev setup is based on the following article [here](https://medium.com/@chewysalmon/laravel-docker-development-setup-an-updated-guide-72842dfe8bdf)
+## Documentation
 
-Launch the project: 
-```
+- Functional requirements: [docs/requirements.md](docs/requirements.md)
+- Use cases: [docs/use_cases.md](docs/use_cases.md)
+- Domain class diagram: [docs/class_diagram.md](docs/class_diagram.md)
+- Conceptual data model: [docs/mcd.md](docs/mcd.md)
+- Physical data model: [docs/mpd.md](docs/mpd.md)
+
+The documentation describes the target product model. It is not yet implemented in the
+current codebase, which still contains the default Laravel starter structure.
+
+## Development
+
+The local development setup is based on Docker.
+
+Start the project:
+
+```bash
 make dev
 ```
 
-Then run the migrations if needed:
-```
+Run the migrations if needed:
+
+```bash
 docker compose exec app php artisan migrate
 ```

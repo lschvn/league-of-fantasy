@@ -1,85 +1,158 @@
-# MCD
+# MCD (Conceptual Data Model)
 
 ```mermaid
 classDiagram
 
-class League {
+class Competition {
     name
     region
+    season
+}
+
+class Week {
+    number
+    start_at
+    end_at
+    lineup_lock_at
+}
+
+class Match {
+    status
+    started_at
+    ended_at
 }
 
 class Team {
     name
     tag
-    logo
+    logo_url
 }
 
 class Player {
-    name
+    nickname
     role
-}
-
-class Match {
     status
-    start_date
-}
-
-class Week {
-    start_date
-    end_date
 }
 
 class PlayerStat {
     kills
     deaths
     assists
+    fantasy_points
 }
 
 class User {
     name
     email
-    password
+    password_hash
     created_at
 }
 
 class FantasyLeague {
-    type
-    created_at
+    name
+    visibility
+    status
+    max_participants
+    budget_cap
+    join_deadline
+    scoring_rule_version
+}
+
+class Membership {
+    role
+    status
+    joined_at
+}
+
+class Invitation {
+    code
+    expires_at
+    max_uses
+    used_count
+    revoked_at
 }
 
 class FantasyTeam {
-    credits
+    name
+    budget_remaining
+}
+
+class RosterSlot {
+    acquisition_cost
+    acquired_at
+    released_at
+    status
+}
+
+class Auction {
+    status
+    start_at
+    end_at
 }
 
 class Bid {
     amount
     status
-    created_at
-    ended_at
+    placed_at
 }
 
+class Lineup {
+    status
+    submitted_at
+    locked_at
+}
 
-League "1" -- "0..*" Team : contains
-League "1" -- "0..*" Week : organizes
+class LineupSlot {
+    position
+    is_captain
+}
 
-Team "1" -- "0..*" Player : has
-Team "1" -- "0..*" Match : participates
+class FantasyTeamScore {
+    points
+    rank
+    calculated_at
+}
+
+Competition "1" -- "0..*" Team : contains
+Competition "1" -- "0..*" Week : organizes
+Competition "1" -- "0..*" FantasyLeague : hosts
 
 Week "1" -- "0..*" Match : includes
+Week "1" -- "0..*" Lineup : receives
+Week "1" -- "0..*" FantasyTeamScore : ranks
 
-Player "0..*" -- "1..*" Match : plays
-PlayerStat "1" -- "1" Player : describes
-PlayerStat "1" -- "1" Match : concerns
+Match "1" -- "2..*" Team : opposes
+PlayerStat "0..*" -- "1" Match : concerns
+PlayerStat "0..*" -- "1" Player : describes
+
+Team "1" -- "0..*" Player : has
 
 User "1" -- "0..*" FantasyLeague : creates
-User "0..*" -- "1..*" FantasyLeague : participates
+User "1" -- "0..*" Membership : owns
 
-User "1" -- "0..*" FantasyTeam : owns
-FantasyLeague "1" -- "0..*" FantasyTeam : contains
+FantasyLeague "1" -- "0..*" Membership : groups
+FantasyLeague "1" -- "0..*" Invitation : authorizes
+FantasyLeague "1" -- "0..*" Auction : schedules
 
-FantasyTeam "0..*" -- "0..*" Player : selects
+Membership "1" -- "1" FantasyTeam : owns
 
-User "1" -- "0..*" Bid : places
-Player "1" -- "0..*" Bid : receives
-FantasyLeague "1" -- "0..*" Bid : organizes
+FantasyTeam "1" -- "0..*" RosterSlot : contains
+FantasyTeam "1" -- "0..*" Bid : places
+FantasyTeam "1" -- "0..*" Lineup : submits
+FantasyTeam "1" -- "0..*" FantasyTeamScore : receives
+
+RosterSlot "0..*" -- "1" Player : assigns
+Auction "1" -- "0..*" Bid : contains
+Bid "0..*" -- "1" Player : targets
+
+Lineup "1" -- "1..*" LineupSlot : contains
+LineupSlot "0..*" -- "1" RosterSlot : activates
 ```
+
+## Conceptual Constraints
+
+- A fantasy league can be public or private, but not both.
+- A membership is mandatory before a fantasy team exists.
+- A private league is joined through invitations, not through the public catalog.
+- A lineup is created for a specific week and activates rostered players only.
+- Standings are derived from stored weekly fantasy team scores.

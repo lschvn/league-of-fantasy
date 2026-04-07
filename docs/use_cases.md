@@ -2,28 +2,49 @@
 
 ## Introduction
 
-This document describes the main use cases of the **Fantasy Esport League** application.  
-Use cases represent the interactions between users and the system to achieve specific goals within the platform.
+This document lists the main use cases of the **Fantasy Esport League** application.
+The wording matches the functional requirements and the UML/data model:
 
-They define how users create or join leagues, build their fantasy teams, and participate in the competition based on real esports match performances.
-
-The purpose of this document is to clearly describe the expected behaviors of the system from the user's perspective.
+- `Competition` is the real esport competition.
+- `Fantasy League` is the user-created contest.
+- `Membership` links a user to a fantasy league.
+- `Fantasy Team` is the roster owned by a membership.
 
 ## Actors
 
-### User
-A registered user of the platform who can create or join leagues, participate in auctions, manage a fantasy team, and compete with other users.
+### Visitor
+
+Creates an account and accesses the authentication flow.
+
+### Registered User
+
+Creates or joins fantasy leagues, participates in auctions, submits lineups,
+and consults scores and rankings.
+
+### League Owner
+
+Creates a fantasy league and manages private access.
 
 ### System
-The automated component responsible for enforcing the rules of the application, managing deadlines, updating fantasy scores, and controlling access to games.
 
----
+Locks lineups, processes weekly scoring, updates standings, and enforces access rules.
 
-## Use Cases
+## Use Case Coverage
 
-| ID   | Use Case Name                         | Main Actor | Objective                                                     | Precondition                                  | Expected Result                               |
-| ---- | ------------------------------------- | ---------- | ------------------------------------------------------------- | ---------------------------------------------- | --------------------------------------------- |
-| [UC01](./uc/01.md) | Create a public game                  | User       | Create a game open to all users                               | Authenticated user                             | Public game created and visible               |
-| [UC02](./uc/02.md) | Join and play a public game           | User       | Join a public game and participate in the game                | Authenticated user, game available             | User becomes a member with an active fantasy team |
-| [UC03](./uc/03.md) | Create a private game                 | User       | Create an invitation-only game                                | Authenticated user                             | Private game created with an invite code/link |
-| [UC04](./uc/04.md) | Join and play a private game          | User       | Join a private game via invitation and participate            | Authenticated user, valid invitation           | User becomes a member with an active fantasy team |
+| ID | Use Case Name | Main Actor | Objective | Covered Features | File |
+| --- | --- | --- | --- | --- | --- |
+| UC01 | Register an account | Visitor | Create a new user account | F01 | [docs/uc/01.md](./uc/01.md) |
+| UC02 | Log in | Registered User | Authenticate and open a session | F02 | [docs/uc/02.md](./uc/02.md) |
+| UC03 | Create a public fantasy league | Registered User | Create a public fantasy league linked to a competition | F03, F15, F16 | [docs/uc/03.md](./uc/03.md) |
+| UC04 | Join a public fantasy league | Registered User | Join an open public fantasy league and receive a fantasy team | F04, F15, F16 | [docs/uc/04.md](./uc/04.md) |
+| UC05 | Create a private fantasy league | League Owner | Create a private fantasy league and generate invitations | F05, F06, F15, F16 | [docs/uc/05.md](./uc/05.md) |
+| UC06 | Join a private fantasy league | Registered User | Join a private fantasy league with a valid invitation | F07, F15, F16 | [docs/uc/06.md](./uc/06.md) |
+| UC07 | Participate in auction and manage roster | Registered User | Bid on players and maintain the roster | F08, F09, F16 | [docs/uc/07.md](./uc/07.md) |
+| UC08 | Submit lineup and consult standings | Registered User | Submit the weekly lineup, view rankings, and inspect statistics | F10, F13, F14 | [docs/uc/08.md](./uc/08.md) |
+| UC09 | Process the weekly fantasy cycle | System | Lock lineups, calculate scores, and update standings | F11, F12, F15, F16 | [docs/uc/09.md](./uc/09.md) |
+
+## Coverage Notes
+
+- All features in [docs/requirements.md](./requirements.md) are covered by at least one use case.
+- Creation and join flows now distinguish public and private fantasy leagues explicitly.
+- Auction, lineup, invitation, and scoring behavior are described as first-class use cases instead of being implied only in text.
