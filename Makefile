@@ -1,4 +1,4 @@
-include .env
+-include .env
 
 
 .PHONY: dev prod clean
@@ -8,7 +8,7 @@ prod:
 	docker compose --profile prod up -d
 
 dev:
-	cp .env.example .env
+	cp ./.env.example ./.env
 	docker compose -f docker-compose.yaml up -d --build
 	docker compose exec app php artisan key:generate
 	docker compose exec app php artisan config:clear
