@@ -12,6 +12,7 @@ class Player extends Model
     use HasFactory;
 
     protected $fillable = [
+        'pandascore_id',
         'team_id',
         'nickname',
         'role',

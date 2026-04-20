@@ -11,6 +11,7 @@ class Competition extends Model
     use HasFactory;
 
     protected $fillable = [
+        'pandascore_id',
         'name',
         'region',
         'season',

@@ -13,6 +13,7 @@ class Team extends Model
     use HasFactory;
 
     protected $fillable = [
+        'pandascore_id',
         'competition_id',
         'name',
         'tag',

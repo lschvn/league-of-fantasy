@@ -15,6 +15,7 @@ class GameMatch extends Model
     protected $table = 'game_matches';
 
     protected $fillable = [
+        'pandascore_id',
         'week_id',
         'status',
         'started_at',
