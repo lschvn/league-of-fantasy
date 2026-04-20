@@ -1,0 +1,1520 @@
+{
+  "info": {
+    "name": "Fantasy Esport Demo API",
+    "description": "Postman collection derived from a successful curl sweep against `http://localhost:8080/api` on 2026-04-20.\n\nImportant:\n- This flow assumes a fresh `make demo` seed.\n- It relies on the seeded demo IDs observed during testing: competition 1, public league 1, private league 2, open auction 2.\n- The mutating auction flow will not replay cleanly if auction `2` has already been closed.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080/api",
+      "type": "string"
+    },
+    {
+      "key": "competitionId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "publicLeagueId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "privateLeagueId",
+      "value": "2",
+      "type": "string"
+    },
+    {
+      "key": "createdLeagueId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "week1Id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "week2Id",
+      "value": "2",
+      "type": "string"
+    },
+    {
+      "key": "matchId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "samplePlayerId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "openAuctionId",
+      "value": "2",
+      "type": "string"
+    },
+    {
+      "key": "ownerTeamId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "eveTeamId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "farahTeamId",
+      "value": "6",
+      "type": "string"
+    },
+    {
+      "key": "newUserPublicTeamId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "newUserPrivateTeamId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "farahRosterSlotId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "privateInviteId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "privateInviteCode",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "newUserName",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "newUserEmail",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "newUserPassword",
+      "value": "Password1",
+      "type": "string"
+    },
+    {
+      "key": "createLeagueJoinDeadline",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "inviteExpiresAt",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "newUserToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ownerEmail",
+      "value": "owner@fantasy.test",
+      "type": "string"
+    },
+    {
+      "key": "ownerPassword",
+      "value": "password",
+      "type": "string"
+    },
+    {
+      "key": "ownerToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "eveEmail",
+      "value": "eve@fantasy.test",
+      "type": "string"
+    },
+    {
+      "key": "evePassword",
+      "value": "password",
+      "type": "string"
+    },
+    {
+      "key": "eveToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "farahEmail",
+      "value": "farah@fantasy.test",
+      "type": "string"
+    },
+    {
+      "key": "farahPassword",
+      "value": "password",
+      "type": "string"
+    },
+    {
+      "key": "farahToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ownerTopSlotId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ownerFlexTopSlotId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ownerJglSlotId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ownerMidCaptainSlotId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ownerFlexMidSlotId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ownerAdcSlotId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ownerSupSlotId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 Public Discovery",
+      "item": [
+        {
+          "name": "GET /competitions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "description": "Lists competitions and confirms the seeded demo competition exists.",
+            "url": "{{baseUrl}}/competitions"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const response = pm.response.json();",
+                  "if (response.data && response.data[0]) {",
+                  "  pm.collectionVariables.set(\"competitionId\", String(response.data[0].id));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /competitions/:competition",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "description": "Shows the seeded competition with teams and weeks.",
+            "url": "{{baseUrl}}/competitions/{{competitionId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /competitions/:competition/weeks",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "description": "Captures week 1 and week 2 IDs from the seeded competition.",
+            "url": "{{baseUrl}}/competitions/{{competitionId}}/weeks"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const response = pm.response.json();",
+                  "const week1 = response.data.find((week) => week.number === 1);",
+                  "const week2 = response.data.find((week) => week.number === 2);",
+                  "if (week1) pm.collectionVariables.set(\"week1Id\", String(week1.id));",
+                  "if (week2) pm.collectionVariables.set(\"week2Id\", String(week2.id));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /weeks/:week/matches",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "description": "Reads week 1 matches and captures the first match ID for downstream requests.",
+            "url": "{{baseUrl}}/weeks/{{week1Id}}/matches"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const response = pm.response.json();",
+                  "if (response.data && response.data[0]) {",
+                  "  pm.collectionVariables.set(\"matchId\", String(response.data[0].id));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /matches/:match",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "description": "Shows the selected match.",
+            "url": "{{baseUrl}}/matches/{{matchId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /matches/:match/player-stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "description": "Reads player stats and captures a valid player ID for the auction bid request.",
+            "url": "{{baseUrl}}/matches/{{matchId}}/player-stats"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const response = pm.response.json();",
+                  "if (response.data && response.data[0]) {",
+                  "  pm.collectionVariables.set(\"samplePlayerId\", String(response.data[0].player_id));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /fantasy-leagues",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "description": "Lists public fantasy leagues and captures the seeded Review League ID.",
+            "url": "{{baseUrl}}/fantasy-leagues"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const response = pm.response.json();",
+                  "const reviewLeague = response.data.find((league) => league.name === \"Review League\");",
+                  "if (reviewLeague) {",
+                  "  pm.collectionVariables.set(\"publicLeagueId\", String(reviewLeague.id));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /fantasy-leagues/:fantasyLeague",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "description": "Reads the public Review League without authentication.",
+            "url": "{{baseUrl}}/fantasy-leagues/{{publicLeagueId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 Auth",
+      "item": [
+        {
+          "name": "POST /register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "description": "Creates a new API user for the join flows. The password must satisfy the Laravel validation policy used by the app.",
+            "url": "{{baseUrl}}/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{newUserName}}\",\n  \"email\": \"{{newUserEmail}}\",\n  \"password\": \"{{newUserPassword}}\",\n  \"password_confirmation\": \"{{newUserPassword}}\",\n  \"device_name\": \"postman-register\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const suffix = Date.now().toString();",
+                  "pm.collectionVariables.set(\"newUserName\", `API Test User ${suffix}`);",
+                  "pm.collectionVariables.set(\"newUserEmail\", `api-test-${suffix}@fantasy.test`);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 201\", function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const response = pm.response.json();",
+                  "pm.collectionVariables.set(\"newUserToken\", response.data.token);",
+                  "pm.collectionVariables.set(\"newUserEmail\", response.data.user.email);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /login owner",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "description": "Logs in the public league owner.",
+            "url": "{{baseUrl}}/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{ownerEmail}}\",\n  \"password\": \"{{ownerPassword}}\",\n  \"device_name\": \"postman-owner\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const response = pm.response.json();",
+                  "pm.collectionVariables.set(\"ownerToken\", response.data.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /login eve",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "description": "Logs in the private league owner.",
+            "url": "{{baseUrl}}/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{eveEmail}}\",\n  \"password\": \"{{evePassword}}\",\n  \"device_name\": \"postman-eve\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const response = pm.response.json();",
+                  "pm.collectionVariables.set(\"eveToken\", response.data.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /login farah",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "description": "Logs in the seeded private league member used for team and roster requests.",
+            "url": "{{baseUrl}}/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{farahEmail}}\",\n  \"password\": \"{{farahPassword}}\",\n  \"device_name\": \"postman-farah\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const response = pm.response.json();",
+                  "pm.collectionVariables.set(\"farahToken\", response.data.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /me owner",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ownerToken}}",
+                "type": "text"
+              }
+            ],
+            "description": "Loads the owner membership and captures the Review League fantasy team ID.",
+            "url": "{{baseUrl}}/me"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const response = pm.response.json();",
+                  "const membership = response.data.memberships.find((entry) => String(entry.fantasy_league_id) === pm.collectionVariables.get(\"publicLeagueId\"));",
+                  "if (membership && membership.fantasy_team) {",
+                  "  pm.collectionVariables.set(\"ownerTeamId\", String(membership.fantasy_team.id));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /me eve",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{eveToken}}",
+                "type": "text"
+              }
+            ],
+            "description": "Loads the private league owner membership and captures the private league and team IDs.",
+            "url": "{{baseUrl}}/me"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const response = pm.response.json();",
+                  "const membership = response.data.memberships[0];",
+                  "if (membership) {",
+                  "  pm.collectionVariables.set(\"privateLeagueId\", String(membership.fantasy_league_id));",
+                  "  pm.collectionVariables.set(\"eveTeamId\", String(membership.fantasy_team.id));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /me farah",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{farahToken}}",
+                "type": "text"
+              }
+            ],
+            "description": "Loads Farah’s fantasy team ID for the roster management step.",
+            "url": "{{baseUrl}}/me"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const response = pm.response.json();",
+                  "const membership = response.data.memberships[0];",
+                  "if (membership && membership.fantasy_team) {",
+                  "  pm.collectionVariables.set(\"farahTeamId\", String(membership.fantasy_team.id));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 League Flows",
+      "item": [
+        {
+          "name": "POST /fantasy-leagues/:fantasyLeague/join",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{newUserToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "description": "Joins the public Review League as the registered API user.",
+            "url": "{{baseUrl}}/fantasy-leagues/{{publicLeagueId}}/join",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"team_name\": \"API Test Public {{$timestamp}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 201\", function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const response = pm.response.json();",
+                  "pm.collectionVariables.set(\"newUserPublicTeamId\", String(response.data.fantasy_team.id));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /fantasy-leagues/:fantasyLeague/members",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{newUserToken}}",
+                "type": "text"
+              }
+            ],
+            "description": "Lists members for the public Review League.",
+            "url": "{{baseUrl}}/fantasy-leagues/{{publicLeagueId}}/members"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /fantasy-leagues/:fantasyLeague/weeks/:week/standings",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{newUserToken}}",
+                "type": "text"
+              }
+            ],
+            "description": "Loads week 1 standings for the public Review League.",
+            "url": "{{baseUrl}}/fantasy-leagues/{{publicLeagueId}}/weeks/{{week1Id}}/standings"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /fantasy-leagues",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{newUserToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "description": "Creates a separate public league to verify the creation endpoint.",
+            "url": "{{baseUrl}}/fantasy-leagues",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"competition_id\": \"{{competitionId}}\",\n  \"name\": \"API Flow League {{$timestamp}}\",\n  \"visibility\": \"public\",\n  \"max_participants\": 8,\n  \"budget_cap\": 120,\n  \"join_deadline\": \"{{createLeagueJoinDeadline}}\",\n  \"scoring_rule_version\": \"v1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const deadline = new Date(Date.now() + (7 * 24 * 60 * 60 * 1000)).toISOString();",
+                  "pm.collectionVariables.set(\"createLeagueJoinDeadline\", deadline);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 201\", function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const response = pm.response.json();",
+                  "pm.collectionVariables.set(\"createdLeagueId\", String(response.data.id));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /fantasy-leagues/:fantasyLeague/invitations",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{eveToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "description": "Creates an invitation in the private league and captures the invite code and ID.",
+            "url": "{{baseUrl}}/fantasy-leagues/{{privateLeagueId}}/invitations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"expires_at\": \"{{inviteExpiresAt}}\",\n  \"max_uses\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const expiresAt = new Date(Date.now() + (2 * 24 * 60 * 60 * 1000)).toISOString();",
+                  "pm.collectionVariables.set(\"inviteExpiresAt\", expiresAt);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 201\", function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const response = pm.response.json();",
+                  "pm.collectionVariables.set(\"privateInviteId\", String(response.data.id));",
+                  "pm.collectionVariables.set(\"privateInviteCode\", response.data.code);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /private-leagues/join",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{newUserToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "description": "Uses the captured invitation to join the private league with the registered API user.",
+            "url": "{{baseUrl}}/private-leagues/join",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"{{privateInviteCode}}\",\n  \"team_name\": \"API Test Private {{$timestamp}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 201\", function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const response = pm.response.json();",
+                  "pm.collectionVariables.set(\"newUserPrivateTeamId\", String(response.data.fantasy_team.id));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /invitations/:invitation",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{eveToken}}",
+                "type": "text"
+              }
+            ],
+            "description": "Revokes the invitation created in the previous step.",
+            "url": "{{baseUrl}}/invitations/{{privateInviteId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04 Auction And Team Management",
+      "item": [
+        {
+          "name": "GET /auctions/:auction",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{eveToken}}",
+                "type": "text"
+              }
+            ],
+            "description": "Reads the seeded open auction in the private league.",
+            "url": "{{baseUrl}}/auctions/{{openAuctionId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /auctions/:auction/bids",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{eveToken}}",
+                "type": "text"
+              }
+            ],
+            "description": "Reads Eve’s bids in the open auction.",
+            "url": "{{baseUrl}}/auctions/{{openAuctionId}}/bids"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /auctions/:auction/bids",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{eveToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "description": "Places an extra Eve bid in the open auction.",
+            "url": "{{baseUrl}}/auctions/{{openAuctionId}}/bids",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fantasy_team_id\": \"{{eveTeamId}}\",\n  \"player_id\": \"{{samplePlayerId}}\",\n  \"amount\": 13\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 201\", function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /auctions/:auction/close",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{eveToken}}",
+                "type": "text"
+              }
+            ],
+            "description": "Closes the auction and awards pending bids. This mutates the seeded state.",
+            "url": "{{baseUrl}}/auctions/{{openAuctionId}}/close"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /fantasy-teams/:team",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{farahToken}}",
+                "type": "text"
+              }
+            ],
+            "description": "Reads Farah’s team after auction resolution.",
+            "url": "{{baseUrl}}/fantasy-teams/{{farahTeamId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /fantasy-teams/:team/roster",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{farahToken}}",
+                "type": "text"
+              }
+            ],
+            "description": "Reads Farah’s roster and captures the first active roster slot for release.",
+            "url": "{{baseUrl}}/fantasy-teams/{{farahTeamId}}/roster"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const response = pm.response.json();",
+                  "const slot = response.data.find((entry) => entry.status === \"active\");",
+                  "if (slot) {",
+                  "  pm.collectionVariables.set(\"farahRosterSlotId\", String(slot.id));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /fantasy-teams/:team/roster/:rosterSlot",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{farahToken}}",
+                "type": "text"
+              }
+            ],
+            "description": "Releases the active roster slot captured in the previous request.",
+            "url": "{{baseUrl}}/fantasy-teams/{{farahTeamId}}/roster/{{farahRosterSlotId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05 Lineups",
+      "item": [
+        {
+          "name": "GET /fantasy-teams/:team/weeks/:week/lineup",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ownerToken}}",
+                "type": "text"
+              }
+            ],
+            "description": "Reads the seeded locked lineup for week 1.",
+            "url": "{{baseUrl}}/fantasy-teams/{{ownerTeamId}}/weeks/{{week1Id}}/lineup"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /fantasy-teams/:team/roster owner",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ownerToken}}",
+                "type": "text"
+              }
+            ],
+            "description": "Reads the owner roster and captures the slot IDs needed for the week 2 lineup submission.",
+            "url": "{{baseUrl}}/fantasy-teams/{{ownerTeamId}}/roster"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const response = pm.response.json();",
+                  "const active = response.data.filter((entry) => entry.status === \"active\");",
+                  "const pick = (role, index) => active.filter((entry) => entry.player.role === role)[index];",
+                  "const top1 = pick(\"TOP\", 0);",
+                  "const top2 = pick(\"TOP\", 1);",
+                  "const jgl = pick(\"JGL\", 0);",
+                  "const mid1 = pick(\"MID\", 0);",
+                  "const mid2 = pick(\"MID\", 1);",
+                  "const adc = pick(\"ADC\", 0);",
+                  "const sup = pick(\"SUP\", 0);",
+                  "if (top1) pm.collectionVariables.set(\"ownerTopSlotId\", String(top1.id));",
+                  "if (top2) pm.collectionVariables.set(\"ownerFlexTopSlotId\", String(top2.id));",
+                  "if (jgl) pm.collectionVariables.set(\"ownerJglSlotId\", String(jgl.id));",
+                  "if (mid1) pm.collectionVariables.set(\"ownerMidCaptainSlotId\", String(mid1.id));",
+                  "if (mid2) pm.collectionVariables.set(\"ownerFlexMidSlotId\", String(mid2.id));",
+                  "if (adc) pm.collectionVariables.set(\"ownerAdcSlotId\", String(adc.id));",
+                  "if (sup) pm.collectionVariables.set(\"ownerSupSlotId\", String(sup.id));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /fantasy-teams/:team/lineups",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ownerToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "description": "Submits a valid week 2 lineup using the captured owner roster slot IDs.",
+            "url": "{{baseUrl}}/fantasy-teams/{{ownerTeamId}}/lineups",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"week_id\": \"{{week2Id}}\",\n  \"slots\": [\n    {\n      \"roster_slot_id\": \"{{ownerTopSlotId}}\",\n      \"position\": \"TOP\",\n      \"is_captain\": false\n    },\n    {\n      \"roster_slot_id\": \"{{ownerJglSlotId}}\",\n      \"position\": \"JGL\",\n      \"is_captain\": false\n    },\n    {\n      \"roster_slot_id\": \"{{ownerMidCaptainSlotId}}\",\n      \"position\": \"MID\",\n      \"is_captain\": true\n    },\n    {\n      \"roster_slot_id\": \"{{ownerAdcSlotId}}\",\n      \"position\": \"ADC\",\n      \"is_captain\": false\n    },\n    {\n      \"roster_slot_id\": \"{{ownerSupSlotId}}\",\n      \"position\": \"SUP\",\n      \"is_captain\": false\n    },\n    {\n      \"roster_slot_id\": \"{{ownerFlexTopSlotId}}\",\n      \"position\": \"FLEX_1\",\n      \"is_captain\": false\n    },\n    {\n      \"roster_slot_id\": \"{{ownerFlexMidSlotId}}\",\n      \"position\": \"FLEX_2\",\n      \"is_captain\": false\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "06 Logout",
+      "item": [
+        {
+          "name": "POST /logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{newUserToken}}",
+                "type": "text"
+              }
+            ],
+            "description": "Revokes the token created by the registration flow.",
+            "url": "{{baseUrl}}/logout"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.collectionVariables.unset(\"newUserToken\");"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
