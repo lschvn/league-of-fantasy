@@ -17,6 +17,7 @@ class WeekResource extends JsonResource
             'end_at' => $this->end_at?->toISOString(),
             'lineup_lock_at' => $this->lineup_lock_at?->toISOString(),
             'matches_count' => $this->whenCounted('matches'),
+            'matches' => GameMatchResource::collection($this->whenLoaded('matches')),
         ];
     }
 }

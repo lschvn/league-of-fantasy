@@ -16,11 +16,7 @@ class MembershipResource extends JsonResource
             'role' => $this->role,
             'status' => $this->status,
             'joined_at' => $this->joined_at?->toISOString(),
-            'user' => $this->whenLoaded('user', fn () => [
-                'id' => $this->user->id,
-                'name' => $this->user->name,
-                'email' => $this->user->email,
-            ]),
+            'user' => new UserResource($this->whenLoaded('user')),
             'fantasy_team' => new FantasyTeamResource($this->whenLoaded('fantasyTeam')),
         ];
     }

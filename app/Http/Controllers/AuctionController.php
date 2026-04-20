@@ -8,7 +8,6 @@ use App\Models\Auction;
 use App\Services\AuctionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class AuctionController extends Controller
 {
@@ -16,23 +15,26 @@ class AuctionController extends Controller
         private readonly AuctionService $auctionService
     ) {}
 
-    public function show(Request $request, Auction $auction): AuctionResource|JsonResponse
+    public function show(Request $request, Auction $auction): JsonResponse
     {
         if (! $auction->fantasyLeague->memberships()->where('user_id', $request->user()->id)->exists()) {
-            return response()->json(['message' => 'Forbidden.'], 403);
+            return $this->forbiddenResponse();
         }
 
-        return new AuctionResource($auction);
+        return $this->successResponse(
+            'auction fetched successfully.',
+            new AuctionResource($auction->load('week'))
+        );
     }
 
-    public function bids(Request $request, Auction $auction): AnonymousResourceCollection|JsonResponse
+    public function bids(Request $request, Auction $auction): JsonResponse
     {
         $membership = $auction->fantasyLeague->memberships()
             ->where('user_id', $request->user()->id)
             ->first();
 
         if (! $membership) {
-            return response()->json(['message' => 'Forbidden.'], 403);
+            return $this->forbiddenResponse();
         }
 
         $bids = $auction->bids()
@@ -41,7 +43,10 @@ class AuctionController extends Controller
             ->latest('placed_at')
             ->get();
 
-        return BidResource::collection($bids);
+        return $this->successResponse(
+            'auction bids fetched successfully.',
+            BidResource::collection($bids)
+        );
     }
 
     public function close(Request $request, Auction $auction): JsonResponse
@@ -51,15 +56,14 @@ class AuctionController extends Controller
             ->first();
 
         if (! $membership || ! $membership->isManager()) {
-            return response()->json(['message' => 'Forbidden.'], 403);
+            return $this->forbiddenResponse();
         }
 
         $auction = $this->auctionService->close($auction);
 
-        return response()->json([
-            'message' => 'Auction closed successfully.',
-            'data' => new AuctionResource($auction),
-            'bids' => BidResource::collection($auction->bids),
+        return $this->successResponse('auction closed successfully.', [
+            'auction' => new AuctionResource($auction->load('week')),
+            'bids' => BidResource::collection($auction->bids()->with('player')->get()),
         ]);
     }
 }

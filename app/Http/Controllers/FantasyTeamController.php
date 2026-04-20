@@ -10,54 +10,59 @@ use App\Models\RosterSlot;
 use App\Models\Week;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Carbon;
 
 class FantasyTeamController extends Controller
 {
-    public function show(Request $request, FantasyTeam $team): FantasyTeamResource|JsonResponse
+    public function show(Request $request, FantasyTeam $team): JsonResponse
     {
         if (! $this->isOwner($request, $team)) {
-            return response()->json(['message' => 'Forbidden.'], 403);
+            return $this->forbiddenResponse();
         }
 
         $team->load(['membership', 'activeRosterSlots.player']);
 
-        return new FantasyTeamResource($team);
+        return $this->successResponse(
+            'fantasy team fetched successfully.',
+            new FantasyTeamResource($team)
+        );
     }
 
-    public function roster(Request $request, FantasyTeam $team): AnonymousResourceCollection|JsonResponse
+    public function roster(Request $request, FantasyTeam $team): JsonResponse
     {
         if (! $this->isOwner($request, $team)) {
-            return response()->json(['message' => 'Forbidden.'], 403);
+            return $this->forbiddenResponse();
         }
 
         $roster = $team->rosterSlots()->with('player')->latest('acquired_at')->get();
 
-        return RosterSlotResource::collection($roster);
+        return $this->successResponse(
+            'fantasy team roster fetched successfully.',
+            RosterSlotResource::collection($roster)
+        );
     }
 
     public function release(Request $request, FantasyTeam $team, RosterSlot $rosterSlot): JsonResponse
     {
         if (! $this->isOwner($request, $team)) {
-            return response()->json(['message' => 'Forbidden.'], 403);
+            return $this->forbiddenResponse();
         }
 
         if ($rosterSlot->fantasy_team_id !== $team->id) {
-            return response()->json(['message' => 'Roster slot does not belong to fantasy team.'], 422);
+            return $this->unprocessableResponse('roster slot does not belong to the fantasy team.');
         }
 
         if ($rosterSlot->status !== 'active') {
-            return response()->json(['message' => 'Roster slot is not active.'], 422);
+            return $this->unprocessableResponse('roster slot is not active.');
         }
 
-        // can't release a player used in a locked lineup
+        // prevent releases when the player is already locked into a lineup
         $inLockedLineup = $rosterSlot->lineupSlots()
             ->whereHas('lineup', fn ($q) => $q->whereNotNull('locked_at'))
             ->exists();
 
         if ($inLockedLineup) {
-            return response()->json(['message' => 'Cannot release a player already used in a locked lineup.'], 422);
+            return $this->unprocessableResponse('cannot release a player already used in a locked lineup.');
         }
 
         $rosterSlot->update([
@@ -65,13 +70,16 @@ class FantasyTeamController extends Controller
             'released_at' => Carbon::now(),
         ]);
 
-        return response()->json(['message' => 'Player released from roster.']);
+        return $this->successResponse(
+            'player released from roster successfully.',
+            new RosterSlotResource($rosterSlot->load('player'))
+        );
     }
 
-    public function showLineup(Request $request, FantasyTeam $team, Week $week): LineupResource|JsonResponse
+    public function showLineup(Request $request, FantasyTeam $team, Week $week): JsonResponse
     {
         if (! $this->isOwner($request, $team)) {
-            return response()->json(['message' => 'Forbidden.'], 403);
+            return $this->forbiddenResponse();
         }
 
         $lineup = $team->lineups()
@@ -80,10 +88,13 @@ class FantasyTeamController extends Controller
             ->first();
 
         if (! $lineup) {
-            return response()->json(['message' => 'Lineup not found.'], 404);
+            return $this->notFoundResponse('lineup not found.');
         }
 
-        return new LineupResource($lineup);
+        return $this->successResponse(
+            'lineup fetched successfully.',
+            new LineupResource($lineup)
+        );
     }
 
     private function isOwner(Request $request, FantasyTeam $team): bool

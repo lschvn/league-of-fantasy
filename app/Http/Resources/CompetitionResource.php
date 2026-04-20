@@ -16,6 +16,8 @@ class CompetitionResource extends JsonResource
             'season' => $this->season,
             'teams_count' => $this->whenCounted('teams'),
             'weeks_count' => $this->whenCounted('weeks'),
+            'teams' => TeamResource::collection($this->whenLoaded('teams')),
+            'weeks' => WeekResource::collection($this->whenLoaded('weeks')),
         ];
     }
 }

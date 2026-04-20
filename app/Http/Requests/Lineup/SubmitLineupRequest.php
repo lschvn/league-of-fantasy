@@ -23,4 +23,12 @@ class SubmitLineupRequest extends FormRequest
             'slots.*.is_captain' => ['required', 'boolean'],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'slots.size' => 'a lineup must contain exactly 7 slots.',
+            'slots.*.position.in' => 'each lineup position must match the allowed fantasy lineup positions.',
+        ];
+    }
 }

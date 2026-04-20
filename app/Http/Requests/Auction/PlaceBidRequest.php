@@ -19,4 +19,13 @@ class PlaceBidRequest extends FormRequest
             'amount' => ['required', 'numeric', 'min:1'],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'fantasy_team_id.exists' => 'the selected fantasy team does not exist.',
+            'player_id.exists' => 'the selected player does not exist.',
+            'amount.min' => 'the bid amount must be at least 1.',
+        ];
+    }
 }

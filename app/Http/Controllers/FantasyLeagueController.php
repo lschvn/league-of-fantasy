@@ -12,7 +12,6 @@ use App\Models\Week;
 use App\Services\LeagueMembershipService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
@@ -23,11 +22,11 @@ class FantasyLeagueController extends Controller
     ) {}
 
     /**
-     * List fantasy leagues available for review.
+     * list fantasy leagues available for review.
      *
      * @unauthenticated
      */
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request): JsonResponse
     {
         $query = FantasyLeague::query()
             ->with('competition')
@@ -38,7 +37,10 @@ class FantasyLeagueController extends Controller
             $query->where('visibility', 'public');
         }
 
-        return FantasyLeagueResource::collection($query->get());
+        return $this->successResponse(
+            'fantasy leagues fetched successfully.',
+            FantasyLeagueResource::collection($query->get())
+        );
     }
 
     public function store(StoreFantasyLeagueRequest $request): JsonResponse
@@ -63,27 +65,31 @@ class FantasyLeagueController extends Controller
             return $league;
         });
 
-        return response()->json([
-            'message' => 'Fantasy league created successfully.',
-            'data' => new FantasyLeagueResource($league->load('competition')),
-        ], 201);
+        return $this->successResponse(
+            'fantasy league created successfully.',
+            new FantasyLeagueResource($league->load(['competition', 'creator'])),
+            201
+        );
     }
 
-    public function show(Request $request, FantasyLeague $fantasyLeague): FantasyLeagueResource|JsonResponse
+    public function show(Request $request, FantasyLeague $fantasyLeague): JsonResponse
     {
         if (! $this->isMember($request, $fantasyLeague)) {
-            return response()->json(['message' => 'Forbidden.'], 403);
+            return $this->forbiddenResponse();
         }
 
-        return new FantasyLeagueResource(
-            $fantasyLeague->load('competition')->loadCount('memberships')
+        return $this->successResponse(
+            'fantasy league fetched successfully.',
+            new FantasyLeagueResource(
+                $fantasyLeague->load(['competition', 'creator'])->loadCount('memberships')
+            )
         );
     }
 
     public function join(JoinPublicFantasyLeagueRequest $request, FantasyLeague $fantasyLeague): JsonResponse
     {
         if ($fantasyLeague->visibility !== 'public') {
-            return response()->json(['message' => 'This endpoint only joins public fantasy leagues.'], 422);
+            return $this->unprocessableResponse('this endpoint only joins public fantasy leagues.');
         }
 
         try {
@@ -93,48 +99,55 @@ class FantasyLeagueController extends Controller
                 $request->input('team_name')
             );
         } catch (RuntimeException $e) {
-            return response()->json(['message' => $e->getMessage()], 422);
+            return $this->unprocessableResponse($e->getMessage());
         }
 
-        return response()->json([
-            'message' => 'Joined fantasy league successfully.',
-            'data' => new MembershipResource($membership),
-        ], 201);
+        return $this->successResponse(
+            'joined fantasy league successfully.',
+            new MembershipResource($membership->load(['user', 'fantasyTeam'])),
+            201
+        );
     }
 
-    public function members(Request $request, FantasyLeague $fantasyLeague): AnonymousResourceCollection|JsonResponse
+    public function members(Request $request, FantasyLeague $fantasyLeague): JsonResponse
     {
         if (! $this->isMember($request, $fantasyLeague)) {
-            return response()->json(['message' => 'Forbidden.'], 403);
+            return $this->forbiddenResponse();
         }
 
         $memberships = $fantasyLeague->memberships()
             ->with(['user', 'fantasyTeam'])
             ->get();
 
-        return MembershipResource::collection($memberships);
+        return $this->successResponse(
+            'fantasy league members fetched successfully.',
+            MembershipResource::collection($memberships)
+        );
     }
 
-    public function standings(Request $request, FantasyLeague $fantasyLeague, Week $week): AnonymousResourceCollection|JsonResponse
+    public function standings(Request $request, FantasyLeague $fantasyLeague, Week $week): JsonResponse
     {
         if ($fantasyLeague->competition_id !== $week->competition_id) {
-            return response()->json(['message' => 'Week does not belong to the same competition.'], 422);
+            return $this->unprocessableResponse('week does not belong to the same competition.');
         }
 
         if (! $this->isMember($request, $fantasyLeague)) {
-            return response()->json(['message' => 'Forbidden.'], 403);
+            return $this->forbiddenResponse();
         }
 
         $scores = $week->scores()
             ->whereHas('fantasyTeam.membership', fn ($q) => $q->where('fantasy_league_id', $fantasyLeague->id))
-            ->with(['fantasyTeam.membership'])
+            ->with(['fantasyTeam.membership.user'])
             ->orderBy('rank')
             ->get();
 
-        return FantasyTeamScoreResource::collection($scores);
+        return $this->successResponse(
+            'fantasy league standings fetched successfully.',
+            FantasyTeamScoreResource::collection($scores)
+        );
     }
 
-    // check if the user can access a private league
+    // check whether the current user can access the target league
     private function isMember(Request $request, FantasyLeague $league): bool
     {
         return $league->visibility === 'public'

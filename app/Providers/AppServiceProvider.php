@@ -6,6 +6,7 @@ use App\Console\Commands\ProcessWeekFantasyCycle;
 use Dedoc\Scramble\Scramble;
 use Dedoc\Scramble\Support\Generator\OpenApi;
 use Dedoc\Scramble\Support\Generator\SecurityScheme;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -18,6 +19,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        JsonResource::withoutWrapping();
+
         Gate::define('viewApiDocs', function ($user = null) {
             return app()->environment(['local', 'testing']);
         });

@@ -9,89 +9,107 @@ use App\Http\Resources\WeekResource;
 use App\Models\Competition;
 use App\Models\GameMatch;
 use App\Models\Week;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\JsonResponse;
 
 class CompetitionController extends Controller
 {
     /**
-     * List available real-world competitions.
+     * list available real-world competitions.
      *
      * @unauthenticated
      */
-    public function index(): AnonymousResourceCollection
+    public function index(): JsonResponse
     {
         $competitions = Competition::query()
             ->withCount(['teams', 'weeks'])
             ->latest()
             ->get();
 
-        return CompetitionResource::collection($competitions);
+        return $this->successResponse(
+            'competitions fetched successfully.',
+            CompetitionResource::collection($competitions)
+        );
     }
 
     /**
-     * Show one competition with teams and scheduled weeks.
+     * show one competition with teams and scheduled weeks.
      *
      * @unauthenticated
      */
-    public function show(Competition $competition): CompetitionResource
+    public function show(Competition $competition): JsonResponse
     {
         $competition->load(['teams.players', 'weeks']);
 
-        return new CompetitionResource($competition);
+        return $this->successResponse(
+            'competition fetched successfully.',
+            new CompetitionResource($competition)
+        );
     }
 
     /**
-     * List the weeks for a competition.
+     * list the weeks for a competition.
      *
      * @unauthenticated
      */
-    public function weeks(Competition $competition): AnonymousResourceCollection
+    public function weeks(Competition $competition): JsonResponse
     {
         $weeks = $competition->weeks()
             ->withCount('matches')
             ->orderBy('number')
             ->get();
 
-        return WeekResource::collection($weeks);
+        return $this->successResponse(
+            'competition weeks fetched successfully.',
+            WeekResource::collection($weeks)
+        );
     }
 
     /**
-     * List the matches scheduled for a competition week.
+     * list the matches scheduled for a competition week.
      *
      * @unauthenticated
      */
-    public function matches(Week $week): AnonymousResourceCollection
+    public function matches(Week $week): JsonResponse
     {
         $matches = $week->matches()
             ->with('teams')
             ->get();
 
-        return GameMatchResource::collection($matches);
+        return $this->successResponse(
+            'week matches fetched successfully.',
+            GameMatchResource::collection($matches)
+        );
     }
 
     /**
-     * Show one match and its teams.
+     * show one match and its teams.
      *
      * @unauthenticated
      */
-    public function showMatch(GameMatch $match): GameMatchResource
+    public function showMatch(GameMatch $match): JsonResponse
     {
         $match->load('teams');
 
-        return new GameMatchResource($match);
+        return $this->successResponse(
+            'match fetched successfully.',
+            new GameMatchResource($match)
+        );
     }
 
     /**
-     * List player statistics recorded for a match.
+     * list player statistics recorded for a match.
      *
      * @unauthenticated
      */
-    public function playerStats(GameMatch $match): AnonymousResourceCollection
+    public function playerStats(GameMatch $match): JsonResponse
     {
         $stats = $match->playerStats()
             ->with('player')
             ->get();
 
-        return PlayerStatResource::collection($stats);
+        return $this->successResponse(
+            'player stats fetched successfully.',
+            PlayerStatResource::collection($stats)
+        );
     }
 }

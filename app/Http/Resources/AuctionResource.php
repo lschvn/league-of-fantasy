@@ -17,6 +17,8 @@ class AuctionResource extends JsonResource
             'start_at' => $this->start_at?->toISOString(),
             'end_at' => $this->end_at?->toISOString(),
             'is_open' => $this->isOpen(),
+            'week' => new WeekResource($this->whenLoaded('week')),
+            'bids' => BidResource::collection($this->whenLoaded('bids')),
         ];
     }
 }

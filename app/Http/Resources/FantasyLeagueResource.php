@@ -21,8 +21,10 @@ class FantasyLeagueResource extends JsonResource
             'join_deadline' => $this->join_deadline?->toISOString(),
             'scoring_rule_version' => $this->scoring_rule_version,
             'competition' => new CompetitionResource($this->whenLoaded('competition')),
+            'creator' => new UserResource($this->whenLoaded('creator')),
             'memberships_count' => $this->whenCounted('memberships'),
             'fantasy_teams_count' => $this->when(isset($this->fantasy_teams_count), $this->fantasy_teams_count),
+            'memberships' => MembershipResource::collection($this->whenLoaded('memberships')),
         ];
     }
 }

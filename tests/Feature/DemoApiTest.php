@@ -30,9 +30,12 @@ it('can authenticate with a seeded demo account', function () {
     $response
         ->assertOk()
         ->assertJsonStructure([
+            'success',
             'message',
-            'token',
-            'user' => ['id', 'name', 'email'],
+            'data' => [
+                'token',
+                'user' => ['id', 'name', 'email'],
+            ],
         ]);
 });
 
@@ -49,7 +52,7 @@ it('returns seeded standings for the public review league', function () {
     $week = Week::where('competition_id', $league->competition_id)->where('number', 1)->firstOrFail();
 
     $response = $this
-        ->withToken($login['token'])
+        ->withToken($login['data']['token'])
         ->getJson("/api/fantasy-leagues/{$league->id}/weeks/{$week->id}/standings");
 
     $response

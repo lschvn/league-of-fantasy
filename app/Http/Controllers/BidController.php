@@ -21,9 +21,9 @@ class BidController extends Controller
     {
         $team = FantasyTeam::with('membership')->findOrFail($request->integer('fantasy_team_id'));
 
-        // only the team owner can bid
+        // only the team owner can place a bid
         if ($team->membership->user_id !== $request->user()->id) {
-            return response()->json(['message' => 'Forbidden.'], 403);
+            return $this->forbiddenResponse();
         }
 
         $player = Player::with('team')->findOrFail($request->integer('player_id'));
@@ -36,12 +36,13 @@ class BidController extends Controller
                 (float) $request->input('amount')
             );
         } catch (RuntimeException $e) {
-            return response()->json(['message' => $e->getMessage()], 422);
+            return $this->unprocessableResponse($e->getMessage());
         }
 
-        return response()->json([
-            'message' => 'Bid placed successfully.',
-            'data' => new BidResource($bid),
-        ], 201);
+        return $this->successResponse(
+            'bid placed successfully.',
+            new BidResource($bid->load('player')),
+            201
+        );
     }
 }

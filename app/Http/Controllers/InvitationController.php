@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Invitation\JoinPrivateLeagueRequest;
 use App\Http\Requests\Invitation\StoreInvitationRequest;
+use App\Http\Resources\InvitationResource;
+use App\Http\Resources\MembershipResource;
 use App\Models\FantasyLeague;
 use App\Models\Invitation;
 use App\Services\LeagueMembershipService;
@@ -26,11 +28,11 @@ class InvitationController extends Controller
             ->first();
 
         if (! $membership || ! $membership->isManager()) {
-            return response()->json(['message' => 'Forbidden.'], 403);
+            return $this->forbiddenResponse();
         }
 
         if ($fantasyLeague->visibility !== 'private') {
-            return response()->json(['message' => 'Invitations are only for private fantasy leagues.'], 422);
+            return $this->unprocessableResponse('invitations are only available for private fantasy leagues.');
         }
 
         $invitation = Invitation::create([
@@ -41,10 +43,11 @@ class InvitationController extends Controller
             'used_count' => 0,
         ]);
 
-        return response()->json([
-            'message' => 'Invitation created successfully.',
-            'data' => $invitation,
-        ], 201);
+        return $this->successResponse(
+            'invitation created successfully.',
+            new InvitationResource($invitation->load('fantasyLeague')),
+            201
+        );
     }
 
     public function join(JoinPrivateLeagueRequest $request): JsonResponse
@@ -55,11 +58,11 @@ class InvitationController extends Controller
             ->first();
 
         if (! $invitation) {
-            return response()->json(['message' => 'Invitation not found.'], 404);
+            return $this->notFoundResponse('invitation not found.');
         }
 
         if (! $invitation->isValid()) {
-            return response()->json(['message' => 'Invitation is no longer valid.'], 422);
+            return $this->unprocessableResponse('invitation is no longer valid.');
         }
 
         try {
@@ -75,13 +78,14 @@ class InvitationController extends Controller
                 return $membership;
             });
         } catch (RuntimeException $e) {
-            return response()->json(['message' => $e->getMessage()], 422);
+            return $this->unprocessableResponse($e->getMessage());
         }
 
-        return response()->json([
-            'message' => 'Joined private fantasy league successfully.',
-            'data' => $membership,
-        ], 201);
+        return $this->successResponse(
+            'joined private fantasy league successfully.',
+            new MembershipResource($membership->load(['user', 'fantasyTeam'])),
+            201
+        );
     }
 
     public function revoke(Request $request, Invitation $invitation): JsonResponse
@@ -91,11 +95,14 @@ class InvitationController extends Controller
             ->first();
 
         if (! $membership || ! $membership->isManager()) {
-            return response()->json(['message' => 'Forbidden.'], 403);
+            return $this->forbiddenResponse();
         }
 
         $invitation->revoke();
 
-        return response()->json(['message' => 'Invitation revoked successfully.']);
+        return $this->successResponse(
+            'invitation revoked successfully.',
+            new InvitationResource($invitation->fresh()->load('fantasyLeague'))
+        );
     }
 }

@@ -17,4 +17,11 @@ class JoinPublicFantasyLeagueRequest extends FormRequest
             'team_name' => ['nullable', 'string', 'max:255'],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'team_name.max' => 'the team name may not be longer than 255 characters.',
+        ];
+    }
 }

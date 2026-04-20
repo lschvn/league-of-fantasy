@@ -18,4 +18,12 @@ class StoreInvitationRequest extends FormRequest
             'max_uses' => ['nullable', 'integer', 'min:1', 'max:1000'],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'expires_at.after' => 'the invitation expiration date must be in the future.',
+            'max_uses.min' => 'the invitation must allow at least one use.',
+        ];
+    }
 }
