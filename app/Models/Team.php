@@ -31,7 +31,7 @@ class Team extends Model
 
     public function matches(): BelongsToMany
     {
-        return $this->belongsToMany(GameMatch::class, 'match_team')
+        return $this->belongsToMany(GameMatch::class, 'match_team', 'team_id', 'match_id')
             ->withPivot('side')
             ->withTimestamps();
     }

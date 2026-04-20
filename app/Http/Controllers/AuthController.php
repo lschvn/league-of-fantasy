@@ -11,6 +11,11 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
+    /**
+     * Register a new API user.
+     *
+     * @unauthenticated
+     */
     public function register(RegisterRequest $request): JsonResponse
     {
         $user = User::create($request->validated());
@@ -24,6 +29,11 @@ class AuthController extends Controller
         ], 201);
     }
 
+    /**
+     * Issue a personal access token for an existing user.
+     *
+     * @unauthenticated
+     */
     public function login(LoginRequest $request): JsonResponse
     {
         $user = User::where('email', $request->string('email')->toString())->first();
@@ -43,6 +53,9 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * Revoke the current personal access token.
+     */
     public function logout(Request $request): JsonResponse
     {
         $request->user()?->currentAccessToken()?->delete();
@@ -52,6 +65,9 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * Return the authenticated user and current memberships.
+     */
     public function me(Request $request): JsonResponse
     {
         return response()->json([

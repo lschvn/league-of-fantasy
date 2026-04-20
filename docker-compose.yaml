@@ -5,6 +5,8 @@ services:
         context: ./
         dockerfile: app.dockerfile
     working_dir: /var/www
+    environment:
+        APP_URL: "http://localhost:${APP_PORT:-8080}"
     volumes:
         - ./:/var/www
     depends_on:
@@ -22,7 +24,7 @@ services:
     depends_on:
         - "app"
     ports:
-        - 80:80
+        - "${APP_PORT:-8080}:80"
     networks:
         - db
   db:
@@ -45,6 +47,18 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+  composer:
+    image: composer:2
+    working_dir: /var/www
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
+    volumes:
+      - ./:/var/www
+  node:
+    image: node:22
+    working_dir: /var/www
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
+    volumes:
+      - ./:/var/www
 networks:
   db:
     driver: bridge

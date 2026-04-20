@@ -15,8 +15,7 @@ class BidController extends Controller
 {
     public function __construct(
         private readonly AuctionService $auctionService
-    ) {
-    }
+    ) {}
 
     public function store(PlaceBidRequest $request, Auction $auction): JsonResponse
     {

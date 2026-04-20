@@ -20,9 +20,13 @@ class FantasyLeagueController extends Controller
 {
     public function __construct(
         private readonly LeagueMembershipService $membershipService
-    ) {
-    }
+    ) {}
 
+    /**
+     * List fantasy leagues available for review.
+     *
+     * @unauthenticated
+     */
     public function index(Request $request): AnonymousResourceCollection
     {
         $query = FantasyLeague::query()
@@ -134,6 +138,7 @@ class FantasyLeagueController extends Controller
     private function isMember(Request $request, FantasyLeague $league): bool
     {
         return $league->visibility === 'public'
-            || $league->memberships()->where('user_id', $request->user()->id)->exists();
+            || ($request->user() !== null
+                && $league->memberships()->where('user_id', $request->user()->id)->exists());
     }
 }

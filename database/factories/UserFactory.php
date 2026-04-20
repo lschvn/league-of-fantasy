@@ -41,4 +41,13 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
+
+    public function demo(string $name, string $email): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'name' => $name,
+            'email' => $email,
+            'password' => config('demo.password'),
+        ]);
+    }
 }

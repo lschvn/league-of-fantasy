@@ -9,16 +9,15 @@ use App\Models\Invitation;
 use App\Services\LeagueMembershipService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use RuntimeException;
 
 class InvitationController extends Controller
 {
     public function __construct(
         private readonly LeagueMembershipService $membershipService
-    ) {
-    }
+    ) {}
 
     public function store(StoreInvitationRequest $request, FantasyLeague $fantasyLeague): JsonResponse
     {

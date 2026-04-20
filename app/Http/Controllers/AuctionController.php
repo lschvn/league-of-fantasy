@@ -14,8 +14,7 @@ class AuctionController extends Controller
 {
     public function __construct(
         private readonly AuctionService $auctionService
-    ) {
-    }
+    ) {}
 
     public function show(Request $request, Auction $auction): AuctionResource|JsonResponse
     {

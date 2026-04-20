@@ -14,8 +14,7 @@ class LineupController extends Controller
 {
     public function __construct(
         private readonly LineupService $lineupService
-    ) {
-    }
+    ) {}
 
     public function submit(SubmitLineupRequest $request, FantasyTeam $team): JsonResponse
     {

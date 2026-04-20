@@ -13,6 +13,11 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class CompetitionController extends Controller
 {
+    /**
+     * List available real-world competitions.
+     *
+     * @unauthenticated
+     */
     public function index(): AnonymousResourceCollection
     {
         $competitions = Competition::query()
@@ -23,6 +28,11 @@ class CompetitionController extends Controller
         return CompetitionResource::collection($competitions);
     }
 
+    /**
+     * Show one competition with teams and scheduled weeks.
+     *
+     * @unauthenticated
+     */
     public function show(Competition $competition): CompetitionResource
     {
         $competition->load(['teams.players', 'weeks']);
@@ -30,6 +40,11 @@ class CompetitionController extends Controller
         return new CompetitionResource($competition);
     }
 
+    /**
+     * List the weeks for a competition.
+     *
+     * @unauthenticated
+     */
     public function weeks(Competition $competition): AnonymousResourceCollection
     {
         $weeks = $competition->weeks()
@@ -40,6 +55,11 @@ class CompetitionController extends Controller
         return WeekResource::collection($weeks);
     }
 
+    /**
+     * List the matches scheduled for a competition week.
+     *
+     * @unauthenticated
+     */
     public function matches(Week $week): AnonymousResourceCollection
     {
         $matches = $week->matches()
@@ -49,6 +69,11 @@ class CompetitionController extends Controller
         return GameMatchResource::collection($matches);
     }
 
+    /**
+     * Show one match and its teams.
+     *
+     * @unauthenticated
+     */
     public function showMatch(GameMatch $match): GameMatchResource
     {
         $match->load('teams');
@@ -56,6 +81,11 @@ class CompetitionController extends Controller
         return new GameMatchResource($match);
     }
 
+    /**
+     * List player statistics recorded for a match.
+     *
+     * @unauthenticated
+     */
     public function playerStats(GameMatch $match): AnonymousResourceCollection
     {
         $stats = $match->playerStats()
