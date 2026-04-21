@@ -89,18 +89,51 @@ class FantasyLeagueController extends Controller
             ->first(fn (array $membership) => (int) data_get($membership, 'user_id') === $currentUserId);
 
         $tab = $request->string('tab')->toString();
-        $activeTab = in_array($tab, ['overview', 'members', 'standings', 'auctions'], true) ? $tab : 'overview';
+        $activeTab = in_array($tab, ['overview', 'members', 'standings', 'auctions', 'matches'], true) ? $tab : 'overview';
         $selectedWeekId = (int) ($request->input('week') ?: data_get($weeks, '0.id'));
         $standings = [];
         $standingsError = null;
+        $matches = [];
+        $matchesError = null;
+        $auctions = [];
+        $auctionsError = null;
 
         if ($activeTab === 'standings' && $selectedWeekId > 0) {
             try {
                 $standings = $this->apiData($this->apiClient->fantasyLeagueStandings($leagueId, $selectedWeekId));
+                $standings = is_array($standings) ? $standings : [];
             } catch (ApiException $exception) {
                 if ($exception->status === 422) {
                     $standingsError = $exception->getMessage();
                     $standings = [];
+                } else {
+                    $this->handleApiException($exception);
+                }
+            }
+        }
+
+        if ($activeTab === 'matches' && $selectedWeekId > 0) {
+            try {
+                $matches = $this->apiData($this->apiClient->weekMatches($selectedWeekId));
+                $matches = is_array($matches) ? $matches : [];
+            } catch (ApiException $exception) {
+                if ($exception->status === 422) {
+                    $matchesError = $exception->getMessage();
+                    $matches = [];
+                } else {
+                    $this->handleApiException($exception);
+                }
+            }
+        }
+
+        if ($activeTab === 'auctions') {
+            try {
+                $auctions = $this->apiData($this->apiClient->fantasyLeagueAuctions($leagueId));
+                $auctions = is_array($auctions) ? $auctions : [];
+            } catch (ApiException $exception) {
+                if ($exception->status === 422) {
+                    $auctionsError = $exception->getMessage();
+                    $auctions = [];
                 } else {
                     $this->handleApiException($exception);
                 }
@@ -113,21 +146,20 @@ class FantasyLeagueController extends Controller
         // created during the current browser session.
         $knownInvitations = $isOwner ? $this->knownInvitations($leagueId) : [];
 
-        // The API does not expose league auction listing or league-linked auction IDs.
-        // This tab can only render auction rooms the user has already opened in this session.
-        $knownAuctions = $this->knownAuctions($leagueId);
-
         return view('pages.leagues.show', [
             'activeTab' => $activeTab,
+            'auctions' => $auctions,
+            'auctionsError' => $auctionsError,
             'currentMembership' => $currentMembership,
             'isOwner' => $isOwner,
             'league' => $league,
             'members' => $members,
+            'matches' => $matches,
+            'matchesError' => $matchesError,
             'selectedWeekId' => $selectedWeekId,
             'standings' => $standings,
             'standingsError' => $standingsError,
             'weeks' => $weeks,
-            'knownAuctions' => $knownAuctions,
             'knownInvitations' => $knownInvitations,
         ]);
     }

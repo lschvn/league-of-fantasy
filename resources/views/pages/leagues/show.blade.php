@@ -8,6 +8,7 @@
             ['label' => 'Overview', 'href' => route('leagues.show', ['fantasyLeague' => $league['id'], 'tab' => 'overview']), 'active' => $activeTab === 'overview'],
             ['label' => 'Members', 'href' => route('leagues.show', ['fantasyLeague' => $league['id'], 'tab' => 'members']), 'active' => $activeTab === 'members'],
             ['label' => 'Standings', 'href' => route('leagues.show', ['fantasyLeague' => $league['id'], 'tab' => 'standings']), 'active' => $activeTab === 'standings'],
+            ['label' => 'Matches', 'href' => route('leagues.show', ['fantasyLeague' => $league['id'], 'tab' => 'matches']), 'active' => $activeTab === 'matches'],
             ['label' => 'Auctions', 'href' => route('leagues.show', ['fantasyLeague' => $league['id'], 'tab' => 'auctions']), 'active' => $activeTab === 'auctions'],
         ];
         $membersSorted = collect($members)
@@ -220,13 +221,78 @@
                 </div>
             @endif
         </section>
+    @elseif ($activeTab === 'matches')
+        <section class="space-y-4">
+            <form method="GET" action="{{ route('leagues.show', $league['id']) }}" class="flex items-center gap-3">
+                <input type="hidden" name="tab" value="matches">
+                <select name="week" class="select select-sm select-bordered">
+                    @foreach ($weeks as $week)
+                        <option value="{{ $week['id'] }}" @selected((int) $selectedWeekId === (int) $week['id'])>
+                            Week {{ $week['number'] }}
+                        </option>
+                    @endforeach
+                </select>
+                <button type="submit" class="btn btn-sm">Load</button>
+            </form>
+
+            @if ($matchesError)
+                <div class="alert alert-error rounded-lg">
+                    <span>{{ $matchesError }}</span>
+                </div>
+            @endif
+
+            @if ($matches === [])
+                <p class="text-sm text-base-content/70">No matches are available for this week.</p>
+            @else
+                <div class="overflow-x-auto border border-base-300 rounded-lg">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Match ID</th>
+                                <th>Teams</th>
+                                <th>Status</th>
+                                <th>Started</th>
+                                <th>Ended</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($matches as $match)
+                                <tr>
+                                    <td class="font-mono text-sm">{{ data_get($match, 'id') }}</td>
+                                    <td>
+                                        <div class="flex items-center gap-2">
+                                            <span class="font-mono text-xs">{{ data_get($match, 'teams.0.tag', '—') }}</span>
+                                            <span class="text-base-content/60">vs</span>
+                                            <span class="font-mono text-xs">{{ data_get($match, 'teams.1.tag', '—') }}</span>
+                                        </div>
+                                    </td>
+                                    <td>{{ data_get($match, 'status') }}</td>
+                                    <td>@uiDate(data_get($match, 'started_at'))</td>
+                                    <td>@uiDate(data_get($match, 'ended_at'))</td>
+                                    <td class="text-right">
+                                        <a href="{{ route('matches.show', data_get($match, 'id')) }}" class="hover:text-primary transition-colors">View stats →</a>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+        </section>
     @else
         <section class="space-y-3">
-            @if ($knownAuctions === [])
-                <p class="text-sm text-base-content/70">No auction rooms are available from the current API context.</p>
+            @if ($auctionsError)
+                <div class="alert alert-error rounded-lg">
+                    <span>{{ $auctionsError }}</span>
+                </div>
+            @endif
+
+            @if ($auctions === [])
+                <p class="text-sm text-base-content/70">No auction rooms are available yet.</p>
             @else
                 <div class="border border-base-300 rounded-lg divide-y divide-base-300">
-                    @foreach ($knownAuctions as $auction)
+                    @foreach ($auctions as $auction)
                         <a href="{{ route('auctions.show', $auction['id']) }}" class="px-4 py-3 flex items-center justify-between gap-4 hover:text-primary transition-colors">
                             <div class="space-y-1">
                                 <p>Auction #{{ $auction['id'] }}</p>

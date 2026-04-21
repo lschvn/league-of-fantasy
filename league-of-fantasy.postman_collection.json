@@ -852,6 +852,39 @@
           ]
         },
         {
+          "name": "GET /fantasy-leagues/:fantasyLeague/auctions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{newUserToken}}",
+                "type": "text"
+              }
+            ],
+            "description": "Lists auction rooms for the selected fantasy league.",
+            "url": "{{baseUrl}}/fantasy-leagues/{{publicLeagueId}}/auctions"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "GET /fantasy-leagues/:fantasyLeague/weeks/:week/standings",
           "request": {
             "method": "GET",
@@ -1091,6 +1124,44 @@
       "name": "04 Auction And Team Management",
       "item": [
         {
+          "name": "GET /fantasy-leagues/:fantasyLeague/auctions private",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{eveToken}}",
+                "type": "text"
+              }
+            ],
+            "description": "Lists private league auctions and captures an open auction ID for auction requests.",
+            "url": "{{baseUrl}}/fantasy-leagues/{{privateLeagueId}}/auctions"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const response = pm.response.json();",
+                  "const openAuction = response.data.find((auction) => auction.status === \"open\") || response.data[0];",
+                  "if (openAuction) {",
+                  "  pm.collectionVariables.set(\"openAuctionId\", String(openAuction.id));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "GET /auctions/:auction",
           "request": {
             "method": "GET",
@@ -1151,6 +1222,43 @@
                   "pm.test(\"status is 200\", function () {",
                   "  pm.response.to.have.status(200);",
                   "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /auctions/:auction/players",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{eveToken}}",
+                "type": "text"
+              }
+            ],
+            "description": "Lists active players eligible for the auction and captures a valid player ID for bidding.",
+            "url": "{{baseUrl}}/auctions/{{openAuctionId}}/players"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const response = pm.response.json();",
+                  "if (response.data && response.data[0]) {",
+                  "  pm.collectionVariables.set(\"samplePlayerId\", String(response.data[0].id));",
+                  "}"
                 ]
               }
             }

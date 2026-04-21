@@ -30,6 +30,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/fantasy-leagues', [FantasyLeagueController::class, 'store']);
     Route::post('/fantasy-leagues/{fantasyLeague}/join', [FantasyLeagueController::class, 'join']);
     Route::get('/fantasy-leagues/{fantasyLeague}/members', [FantasyLeagueController::class, 'members']);
+    Route::get('/fantasy-leagues/{fantasyLeague}/auctions', [FantasyLeagueController::class, 'auctions']);
     Route::get('/fantasy-leagues/{fantasyLeague}/weeks/{week}/standings', [FantasyLeagueController::class, 'standings']);
 
     Route::post('/fantasy-leagues/{fantasyLeague}/invitations', [InvitationController::class, 'store']);
@@ -44,6 +45,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/auctions/{auction}', [AuctionController::class, 'show']);
     Route::get('/auctions/{auction}/bids', [AuctionController::class, 'bids']);
+    Route::get('/auctions/{auction}/players', [AuctionController::class, 'players']);
     Route::post('/auctions/{auction}/bids', [BidController::class, 'store']);
     Route::post('/auctions/{auction}/close', [AuctionController::class, 'close']);
 });

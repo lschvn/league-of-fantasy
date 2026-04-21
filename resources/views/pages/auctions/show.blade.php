@@ -79,10 +79,34 @@
 
                     <div class="form-control">
                         <label for="player_id" class="label">
-                            <span class="label-text">Player ID</span>
+                            <span class="label-text">Player</span>
                         </label>
-                        <input id="player_id" type="number" name="player_id" value="{{ old('player_id') }}" min="1" class="input input-bordered w-full" required>
-                        <p class="text-sm text-base-content/70 mt-1">Player ID from the competition roster.</p>
+                        <select id="player_id" name="player_id" class="select select-bordered w-full" @disabled($players === []) required>
+                            @if ($players === [])
+                                <option value="">No players available</option>
+                            @else
+                                <option value="">Select a player</option>
+                                @foreach ($players as $player)
+                                    @php
+                                        $teamId = (string) data_get($player, 'team.id', data_get($player, 'team_id', ''));
+                                        $teamLabel = data_get($player, 'team.tag')
+                                            ?: data_get($player, 'team.name')
+                                            ?: data_get($teamsById, $teamId.'.tag')
+                                            ?: data_get($teamsById, $teamId.'.name')
+                                            ?: (filled($teamId) ? 'Team #'.$teamId : 'Unknown team');
+                                        $nickname = data_get($player, 'nickname') ?: 'Player #'.data_get($player, 'id');
+                                    @endphp
+                                    <option value="{{ $player['id'] }}" @selected((int) old('player_id') === (int) $player['id'])>
+                                        {{ $teamLabel }} · {{ data_get($player, 'role', '—') }} · {{ $nickname }}
+                                    </option>
+                                @endforeach
+                            @endif
+                        </select>
+                        @if ($playersError)
+                            <p class="text-warning text-sm mt-1">{{ $playersError }}</p>
+                        @elseif ($players === [])
+                            <p class="text-sm text-base-content/70 mt-1">No players are currently available for this auction.</p>
+                        @endif
                         @error('player_id')
                             <p class="text-error text-sm mt-1">{{ $message }}</p>
                         @enderror
@@ -104,5 +128,54 @@
                 <p class="text-sm text-base-content/70">You cannot place a bid in this auction right now.</p>
             @endif
         </div>
+    </section>
+
+    <section class="space-y-3">
+        <h2 class="text-base font-medium">Related matches</h2>
+
+        @if ($matchesError)
+            <div class="alert alert-error rounded-lg">
+                <span>{{ $matchesError }}</span>
+            </div>
+        @endif
+
+        @if ($matches === [])
+            <p class="text-sm text-base-content/70">No matches are scheduled for this auction week.</p>
+        @else
+            <div class="overflow-x-auto border border-base-300 rounded-lg">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Match ID</th>
+                            <th>Teams</th>
+                            <th>Status</th>
+                            <th>Started</th>
+                            <th>Ended</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($matches as $match)
+                            <tr>
+                                <td class="font-mono text-sm">{{ data_get($match, 'id') }}</td>
+                                <td>
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-mono text-xs">{{ data_get($match, 'teams.0.tag', '—') }}</span>
+                                        <span class="text-base-content/60">vs</span>
+                                        <span class="font-mono text-xs">{{ data_get($match, 'teams.1.tag', '—') }}</span>
+                                    </div>
+                                </td>
+                                <td>{{ data_get($match, 'status') }}</td>
+                                <td>@uiDate(data_get($match, 'started_at'))</td>
+                                <td>@uiDate(data_get($match, 'ended_at'))</td>
+                                <td class="text-right">
+                                    <a href="{{ route('matches.show', data_get($match, 'id')) }}" class="hover:text-primary transition-colors">View stats →</a>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
     </section>
 @endsection

@@ -35,6 +35,10 @@ return [
         ],
     ],
 
+    'app_api' => [
+        'base_url' => env('APP_API_BASE_URL'),
+    ],
+
     'pandascore' => [
         'api_key' => env('PANDASCORE_API_KEY'),
         'base_url' => env('PANDASCORE_BASE_URL', 'https://api.pandascore.co'),

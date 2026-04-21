@@ -14,12 +14,32 @@
         <h2 class="text-base font-medium">Teams</h2>
         <div class="border border-base-300 rounded-lg divide-y divide-base-300">
             @foreach ($competition['teams'] as $team)
-                <div class="px-4 py-3 flex items-center justify-between gap-4">
-                    <div class="flex items-center gap-3 min-w-0">
-                        <span class="font-mono text-xs bg-base-200 rounded px-1.5 py-0.5">{{ $team['tag'] }}</span>
-                        <span class="truncate">{{ $team['name'] }}</span>
+                @php
+                    $players = collect(data_get($team, 'players', []))
+                        ->sortBy('nickname')
+                        ->values();
+                @endphp
+                <div class="px-4 py-3 space-y-3">
+                    <div class="flex items-center justify-between gap-4">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <span class="font-mono text-xs bg-base-200 rounded px-1.5 py-0.5">{{ $team['tag'] }}</span>
+                            <span class="truncate">{{ $team['name'] }}</span>
+                        </div>
+                        <p class="text-sm text-base-content/70 whitespace-nowrap">{{ $players->count() }} players</p>
                     </div>
-                    <p class="text-sm text-base-content/70 whitespace-nowrap">{{ count($team['players'] ?? []) }} players</p>
+
+                    @if ($players->isEmpty())
+                        <p class="text-sm text-base-content/70">No players listed.</p>
+                    @else
+                        <div class="flex flex-wrap gap-2">
+                            @foreach ($players as $player)
+                                <span class="badge badge-ghost gap-1">
+                                    <span class="font-mono text-[10px]">{{ data_get($player, 'role', '—') }}</span>
+                                    <span>{{ data_get($player, 'nickname') }}</span>
+                                </span>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
             @endforeach
         </div>

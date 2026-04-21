@@ -53,6 +53,20 @@ After the command completes, the main review URLs are:
 - OpenAPI JSON: `http://localhost:8080/docs/api.json`
 - Swagger UI: `http://localhost:8080/swagger`
 
+The frontend dispatches API calls internally by default. If you run the API on a
+different host, set `APP_API_BASE_URL` in `.env`.
+
+PandaScore integration:
+
+- Set `PANDASCORE_API_KEY` in `.env` to enable live synchronization from PandaScore.
+- Running `php artisan fantasy:process-week {week_id}` synchronizes matches and players from PandaScore before lineup lock/scoring.
+
+Auction and roster discovery endpoints used by the frontend:
+
+- `GET /api/fantasy-leagues/{fantasyLeague}/auctions`
+- `GET /api/auctions/{auction}/players`
+- `GET /api/weeks/{week}/matches`
+
 Seeded demo credentials:
 
 - `owner@fantasy.test` / `password`

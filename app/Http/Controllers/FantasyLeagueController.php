@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\FantasyLeague\JoinPublicFantasyLeagueRequest;
 use App\Http\Requests\FantasyLeague\StoreFantasyLeagueRequest;
+use App\Http\Resources\AuctionResource;
 use App\Http\Resources\FantasyLeagueResource;
 use App\Http\Resources\FantasyTeamScoreResource;
 use App\Http\Resources\MembershipResource;
@@ -125,6 +126,30 @@ class FantasyLeagueController extends Controller
         );
     }
 
+    /**
+     * list auctions for a fantasy league.
+     *
+     * @authenticated
+     *
+     * @urlParam fantasyLeague integer required The fantasy league ID. Example: 1
+     */
+    public function auctions(Request $request, FantasyLeague $fantasyLeague): JsonResponse
+    {
+        if (! $this->isMember($request, $fantasyLeague)) {
+            return $this->forbiddenResponse();
+        }
+
+        $auctions = $fantasyLeague->auctions()
+            ->with('week')
+            ->latest('start_at')
+            ->get();
+
+        return $this->successResponse(
+            'fantasy league auctions fetched successfully.',
+            AuctionResource::collection($auctions)
+        );
+    }
+
     public function standings(Request $request, FantasyLeague $fantasyLeague, Week $week): JsonResponse
     {
         if ($fantasyLeague->competition_id !== $week->competition_id) {
@@ -150,8 +175,10 @@ class FantasyLeagueController extends Controller
     // check whether the current user can access the target league
     private function isMember(Request $request, FantasyLeague $league): bool
     {
+        $user = $request->user('sanctum') ?? $request->user();
+
         return $league->visibility === 'public'
-            || ($request->user() !== null
-                && $league->memberships()->where('user_id', $request->user()->id)->exists());
+            || ($user !== null
+                && $league->memberships()->where('user_id', $user->id)->exists());
     }
 }
