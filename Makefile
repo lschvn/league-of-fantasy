@@ -31,7 +31,7 @@ prepare-filesystem:
 
 install-deps:
 	$(DOCKER_USER_ENV) $(DOCKER_COMPOSE) run --rm composer install --no-scripts --no-interaction
-	$(DOCKER_USER_ENV) $(DOCKER_COMPOSE) run --rm node npm install
+	$(DOCKER_USER_ENV) $(DOCKER_COMPOSE) run --rm node npm ci
 	$(DOCKER_USER_ENV) $(DOCKER_COMPOSE) run --rm node npm run build
 
 app-setup:
